@@ -4,54 +4,67 @@
 // but you don't so you're going to write it from scratch:
 
 var stringifyJSON = function(obj) {
-	var helper = function(objpiece) {
-		if (objpiece === null) {
-			return 'null';
-		}
+	if (obj === null) {
+		return 'null';
+	}
 
-		if (Array.isArray(objpiece)) {
-			var result = objpiece.reduce(function(JSON, curr, i, arr) {
-				JSON += helper(curr);
-				if (i !== arr.length - 1) {
-					JSON += ',';
-				}
-				return JSON;
-			}, '[');
-			
-			result += ']';
-			return result;
-		}
+	if (Array.isArray(obj)) {
+		var result = obj.reduce(function(JSONstring, curr, i, arr) {
+			JSONstring += stringifyJSON(curr);
 
-		if (typeof objpiece === undefined ||
-			typeof objpiece === "function" ||
-			typeof objpiece === "symbol") {
-			return '';
-		}
-
-		if (typeof objpiece === "number" ||
-			typeof objpiece === "boolean") {
-			return objpiece.toString(); 
-		}
-
-		if (typeof objpiece === "string") {
-			var result = '"' + objpiece + '"';
-			return result;
-		}
-
-		if (typeof objpiece === "object") {
-			var result = '{';
-			for (var key in objpiece) {
-				result += helper(key) + ':' + helper(objpiece[key]);
+			if (i !== arr.length - 1) {
+				JSONstring += ',';
 			}
-			result += '}';			
-			return result;
-		};
-	};
+
+			return JSONstring;
+
+		}, '[');
+		
+		result += ']';
+
+		return result;
+	}
+
+	if (typeof obj === "object") {
+		var result = '{';
+
+		for (var key in obj) {
+			if (stringifyJSON(obj[key])) {
+				result += stringifyJSON(key) + ':' + stringifyJSON(obj[key]) + ",";
+			}
+		}
+
+		if (result !== '{') {
+			result = result.slice(0, result.length - 1);
+		}
+
+		result += '}';
+
+		return result;
+	}
+
+	if (typeof obj === "undefined" ||
+		typeof obj === "function" ||
+		typeof obj === "symbol") {
+		return "";
+	}
+
+	if (typeof obj === "number" ||
+		typeof obj === "boolean") {
+		return obj.toString(); 
+	}
+
+	if (typeof obj === "string") {
+		var result = '"' + obj + '"';
+		return result;
+	}
+
+
 
 	//IF Array, loop through as an array,
 	//IF Object, loop through as an object;
 
-	var result = helper(obj);
+	var result = stringifyJSON(obj);
 
 	/* Don't think the following code is necessary anymore
 
